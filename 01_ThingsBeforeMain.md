@@ -6,11 +6,11 @@
 namespace { \
 class __Registerer_##func { \
     public: \
-    __Registerer_##func() { \
-        g_brew_map[#func] = &func; \
-    } \
-}; \
-__Registerer_##func g_registerer_##func; \
+        __Registerer_##func() { \
+            g_brew_map[#func] = &func; \
+        } \
+    }; \
+    __Registerer_##func g_registerer_##func; \
 }
 ```
 其中`##var`拼接##前面的字符串和后面的`func`变量对应的变量名字符串, 而`g_brew_map`是一个全局的string -> BrewFunction的std::map, 即一个由string到函数指针的映射.</br>
@@ -49,4 +49,8 @@ __Registerer_##func g_registerer_##func; \
 ```
 而在每个具体类型的layer的.cpp文件中最后都会调用`REGISTER_LAYER_CLASS`这个宏, 此宏中会利用该layer的构造函数生成一个返回该layer的指针的Creator函数.</br>
 得到这个函数后, 会把这个函数的指针以及type送给另一个宏`REGISTER_LAYER_CREATOR`, 在该宏中会调用`LayerRegisterer`类把这种layer也添加到上述的`static map`中, 从而实现了框架对于每个Layer的支持.</br>
+实际实例化某个`Layer`时, 程序中会利用`map`找到对应的这个`Creator`函数的指针从而执行这个函数. 而这个函数的功能就是在其中实例化一个`Layer`, 并返回这个`Layer`的指针.</br>
 该过程也发生于main()函数运行之前.
+
+### Solver的工厂模式
+其机制与Layer的是一样的， 就是把`Layer`替换为`Solver`: 有一个`solver_factory.hpp`文件, 其中有两个类`SolverRegistry`和`LayerRegisterer`, 以及两个宏`REGISTER_SOLVER_CLASS`和`REGISTER_SOLVER_CREATOR`, 其余的实例化的Solver使用这些函数/宏进行register.

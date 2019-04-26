@@ -74,6 +74,7 @@ __Registerer_##func g_registerer_##func; \
 
 static BrewFunction GetBrewFunction(const caffe::string& name) {
   if (g_brew_map.count(name)) {
+    // 这个map的内容在通过RegisterBrewFunction()宏在main()函数运行之前即完成
     return g_brew_map[name];
   } else {
     LOG(ERROR) << "Available caffe actions:";
@@ -437,6 +438,7 @@ int main(int argc, char** argv) {
 #ifdef WITH_PYTHON_LAYER
     try {
 #endif
+      // 根据输入参数选择适当的函数
       return GetBrewFunction(caffe::string(argv[1]))();
 #ifdef WITH_PYTHON_LAYER
     } catch (bp::error_already_set) {
